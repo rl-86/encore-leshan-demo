@@ -14,9 +14,7 @@ services:
       - "5684/udp"
 
   encore:
-    image: tony300/my-encore-demo:1.2
-    env_file:
-      - ./.env
+    image: tony300/encore-leshan-demo:1.0
     ports:
       - "4000:8080"
     depends_on:
