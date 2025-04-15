@@ -1,13 +1,17 @@
 services:
   demo:
-    build: ./leshanDemoServer
+    build: 
+      context: ./leshanDemoServer
+      dockerfile: Dockerfile.leshan-server
     # Internal networking only - no direct port exposure
     expose:
       - "8080"
       - "5683/udp"
 
   bootstrap:
-    build: ./bootstrapServer
+    build: 
+      context: ./bootstrapServer
+      dockerfile: Dockerfile.leshan-bsserver
     # Internal networking only - no direct port exposure
     expose:
       - "8080"
