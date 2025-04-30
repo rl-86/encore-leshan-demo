@@ -1,7 +1,9 @@
-FROM openjdk:8-jre-alpine
+FROM eclipse-temurin:11-alpine
 
 WORKDIR /app
 
-COPY leshan-server.jar /app/leshan-server.jar
+COPY leshan-server-demo.jar /app/leshan-server-demo.jar
 
-CMD ["java", "-jar", "/app/leshan-server.jar"]
+EXPOSE 5683 5684 5783 5784 8080
+
+CMD ["java", "-jar", "/app/leshan-server-demo.jar"]
