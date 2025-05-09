@@ -9,7 +9,7 @@ const username = secret('username');
 const password = secret('password');
 
 export const getAllClients = api(
-  { method: 'GET', path: '/api/clients', expose: true, auth: true },
+  { method: 'GET', path: '/clients', expose: true, auth: true },
   async (): Promise<{ clients: any }> => {
 
     // auth for nginx basic auth
@@ -37,15 +37,29 @@ export const getAllClients = api(
 
     // Return the data in a JSON object
     return { clients };
-  }
+  } 
 );
 
 export const getBootstrapClients = api(
-  { method: 'GET', path: '/api/bsclients', expose: true, auth: true },
+  { method: 'GET', path: '/bsclients', expose: true, auth: true },
   async (): Promise<{ bsClients: any }> => {
 
+    const userLogin = username();
+    const pass = password();
+    const authHeader =
+      'Basic ' + Buffer.from(`${userLogin}:${pass}`).toString('base64');
+
+    // Call the external API
     const url = bootstrap_clients();
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': authHeader,
+        'Content-type': 'application/json',
+      },
+    });
+
+    
 
     if (!response.ok) {
       throw new Error(`Failed to fetch clients: ${response.statusText}`);
@@ -66,7 +80,7 @@ interface GetClientResponse {
 }
 
 export const getObjectSpec = api(
-  { method: 'GET', path: '/api/objectspecs/:clientId', expose: true, auth: true },
+  { method: 'GET', path: '/objectspecs/:clientId', expose: true, auth: true },
   async ({ clientId }: GetClientRequest): Promise<GetClientResponse> => {
 
     const userLogin = username();
@@ -94,7 +108,7 @@ export const getObjectSpec = api(
 );
 
 export const getClient = api(
-  { method: 'GET', path: '/api/clients/:clientId', expose: true, auth: true },
+  { method: 'GET', path: '/clients/:clientId', expose: true, auth: true },
   async ({ clientId }: GetClientRequest): Promise<GetClientResponse> => {
 
     const userLogin = username();

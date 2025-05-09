@@ -19,12 +19,14 @@ services:
       - "5684:5684/udp"
 
   encore:
-    image: tony300/encore-leshan-demo:1.0
+    image: tony300/encore-leshan-demo:1.7
     ports:
-      - "4000:8080"
+      - "8080:8080"
     depends_on:
       - demo
       - bootstrap
+    env_file:
+      - .env
     command: ["encore", "run"]
 
   nginx:
@@ -37,3 +39,4 @@ services:
     depends_on:
       - demo
       - bootstrap
+      - encore
