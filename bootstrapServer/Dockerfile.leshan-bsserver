@@ -1,0 +1,9 @@
+FROM eclipse-temurin:11-alpine
+
+WORKDIR /app
+
+COPY leshan-bsserver-demo.jar /app/leshan-bsserver-demo.jar
+
+EXPOSE 5683 5684 5783 5784 8080
+
+CMD ["java", "-jar", "/app/leshan-bsserver-demo.jar"]
