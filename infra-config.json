@@ -28,6 +28,9 @@
         },
         "token": {
             "$env": "token"
+        },
+        "clientSecurityConfDelete": {
+            "$env": "clientSecurityConfDelete"
         }
     }
 }

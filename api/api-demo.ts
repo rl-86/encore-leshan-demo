@@ -5,6 +5,8 @@ const allClients = secret('clients');
 const objectSpecs = secret('objectSpecs');
 const bootstrap_clients = secret('bootstrap_clients');
 const spescificClient = secret('client');
+
+const clientSecurityConfDelete = secret("clientSecurityConfDelete");
 const username = secret('username');
 const password = secret('password');
 
@@ -134,3 +136,22 @@ export const getClient = api(
     return { client };
   }
 );
+
+// Delete a specific client security configuration
+export const deleteBsConf = api(
+  {method: 'DELETE', path: '/clients/:clientId', expose: true, auth: true},
+  async ({ clientId }: {clientId: string}): Promise<void> => {
+    const url = clientSecurityConfDelete();
+    const response = await fetch(url + `${clientId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`External delete failed: ${response.status} ${errorBody}`);
+    }
+  }
+)
