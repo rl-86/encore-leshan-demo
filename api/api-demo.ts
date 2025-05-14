@@ -5,6 +5,7 @@ const allClients = secret('clients');
 const objectSpecs = secret('objectSpecs');
 const bootstrap_clients = secret('bootstrap_clients');
 const spescificClient = secret('client');
+const bootstrapDelete = secret('bootstrapDelete');
 const username = secret('username');
 const password = secret('password');
 
@@ -39,7 +40,7 @@ export const getAllClients = api(
     return { clients };
   } 
 );
-
+// Get all the bootstrap clients configurations
 export const getBootstrapClients = api(
   { method: 'GET', path: '/bsclients', expose: true, auth: true },
   async (): Promise<{ bsClients: any }> => {
@@ -59,8 +60,6 @@ export const getBootstrapClients = api(
       },
     });
 
-    
-
     if (!response.ok) {
       throw new Error(`Failed to fetch clients: ${response.statusText}`);
     }
@@ -78,7 +77,7 @@ interface GetClientRequest {
 interface GetClientResponse {
   client: any;
 }
-
+// Get the object specification of a client
 export const getObjectSpec = api(
   { method: 'GET', path: '/objectspecs/:clientId', expose: true, auth: true },
   async ({ clientId }: GetClientRequest): Promise<GetClientResponse> => {
@@ -106,7 +105,7 @@ export const getObjectSpec = api(
     return { client };
   }
 );
-
+// Get specific client
 export const getClient = api(
   { method: 'GET', path: '/clients/:clientId', expose: true, auth: true },
   async ({ clientId }: GetClientRequest): Promise<GetClientResponse> => {
@@ -134,3 +133,22 @@ export const getClient = api(
     return { client };
   }
 );
+
+// Delete a specific bootstrap configuration
+export const deleteBsConf = api(
+  {method: 'DELETE', path: '/bsclients/:clientId', expose: true, auth: true},
+  async ({ clientId }: {clientId: string}): Promise<void> => {
+    const url = bootstrapDelete();
+    const response = await fetch(url + `${clientId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`External delete failed: ${response.status} ${errorBody}`);
+    }
+  }
+)

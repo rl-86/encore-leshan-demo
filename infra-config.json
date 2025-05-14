@@ -28,6 +28,9 @@
         },
         "token": {
             "$env": "token"
+        },
+        "bootstrapDelete": {
+            "$env": "bootstrapDelete"
         }
     }
 }
