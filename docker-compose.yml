@@ -1,5 +1,5 @@
 services:
-  demo:
+  dm:
     build: 
       context: ./leshanDemoServer
       dockerfile: Dockerfile.leshan-server
@@ -19,12 +19,14 @@ services:
       - "5684:5684/udp"
 
   encore:
-    image: tony300/encore-leshan-demo:1.0
+    image: tony300/encore-leshan-demo:2.0.0
     ports:
-      - "4000:8080"
+      - "8080:8080"
     depends_on:
-      - demo
+      - dm
       - bootstrap
+    env_file:
+      - .env
     command: ["encore", "run"]
 
   nginx:
@@ -35,5 +37,6 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/.htpasswd:/etc/nginx/.htpasswd:ro
     depends_on:
-      - demo
+      - dm
       - bootstrap
+      - encore
