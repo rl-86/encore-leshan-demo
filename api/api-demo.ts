@@ -5,7 +5,7 @@ const allClients = secret('clients');
 const objectSpecs = secret('objectSpecs');
 const bootstrap_clients = secret('bootstrap_clients');
 const spescificClient = secret('client');
-const clientSecurityConfDelete = secret("clientSecurityConfDelete");
+const clientSecurityConfDelete = secret('clientSecurityConfDelete');
 const bootstrapDelete = secret('bootstrapDelete');
 const username = secret('username');
 const password = secret('password');
@@ -13,7 +13,6 @@ const password = secret('password');
 export const getAllClients = api(
   { method: 'GET', path: '/clients', expose: true, auth: true },
   async (): Promise<{ clients: any }> => {
-
     // auth for nginx basic auth
     const userLogin = username();
     const pass = password();
@@ -39,30 +38,23 @@ export const getAllClients = api(
 
     // Return the data in a JSON object
     return { clients };
-  } 
+  }
 );
 // Get all the bootstrap clients configurations
 export const getBootstrapClients = api(
   { method: 'GET', path: '/bsclients', expose: true, auth: true },
   async (): Promise<{ bsClients: any }> => {
-
-    const userLogin = username();
-    const pass = password();
-    const authHeader =
-      'Basic ' + Buffer.from(`${userLogin}:${pass}`).toString('base64');
-
     // Call the external API
     const url = bootstrap_clients();
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Authorization': authHeader,
         'Content-type': 'application/json',
       },
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch clients: ${response.statusText}`);
+      throw new Error(`Failed to fetch bsclients: ${response.statusText}`);
     }
 
     const bsClients = await response.json();
@@ -82,7 +74,6 @@ interface GetClientResponse {
 export const getObjectSpec = api(
   { method: 'GET', path: '/objectspecs/:clientId', expose: true, auth: true },
   async ({ clientId }: GetClientRequest): Promise<GetClientResponse> => {
-
     const userLogin = username();
     const pass = password();
     const authHeader =
@@ -92,13 +83,13 @@ export const getObjectSpec = api(
     const response = await fetch(url + `${clientId}`, {
       method: 'GET',
       headers: {
-        'Authorization': authHeader,
+        Authorization: authHeader,
         'Content-type': 'application/json',
       },
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch clients: ${response.statusText}`);
+      throw new Error(`Failed to fetch clients specs: ${response.statusText}`);
     }
 
     const client = await response.json();
@@ -110,7 +101,6 @@ export const getObjectSpec = api(
 export const getClient = api(
   { method: 'GET', path: '/clients/:clientId', expose: true, auth: true },
   async ({ clientId }: GetClientRequest): Promise<GetClientResponse> => {
-
     const userLogin = username();
     const pass = password();
     const authHeader =
@@ -126,7 +116,7 @@ export const getClient = api(
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch clients: ${response.statusText}`);
+      throw new Error(`Failed to fetch client: ${response.statusText}`);
     }
 
     const client = await response.json();
@@ -137,8 +127,8 @@ export const getClient = api(
 
 // Delete a specific bootstrap configuration
 export const deleteBsConf = api(
-  {method: 'DELETE', path: '/bsclients/:clientId', expose: true, auth: true},
-  async ({ clientId }: {clientId: string}): Promise<void> => {
+  { method: 'DELETE', path: '/bsclients/:clientId', expose: true, auth: true },
+  async ({ clientId }: { clientId: string }): Promise<void> => {
     const url = bootstrapDelete();
     const response = await fetch(url + `${clientId}`, {
       method: 'DELETE',
@@ -149,10 +139,35 @@ export const deleteBsConf = api(
 
     if (!response.ok) {
       const errorBody = await response.text();
-      throw new Error(`External delete failed: ${response.status} ${errorBody}`);
+      throw new Error(
+        `External delete failed: ${response.status} ${errorBody}`
+      );
     }
   }
+);
 
-  // Delete a client security configuration
-  // export const 
-)
+// Delete a client security configuration
+export const deleteClientSecurityConf = api(
+  { method: 'DELETE', path: '/clients/:clientId', expose: true, auth: true },
+  async ({ clientId }: { clientId: string }): Promise<void> => {
+    const userLogin = username();
+    const pass = password();
+    const authHeader =
+      'Basic ' + Buffer.from(`${userLogin}:${pass}`).toString('base64');
+
+    const url = clientSecurityConfDelete();
+    const response = await fetch(url + `${clientId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': authHeader,
+        'Content-type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(
+        `External delete failed: ${response.status} ${errorBody}`
+      );
+    }
+  }
+);
