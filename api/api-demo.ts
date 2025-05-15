@@ -137,9 +137,9 @@ export const postBootstrapConfig = api<PostBootstrapConfigt, void>(
     auth: false,
   },
   async ({ clientId, config }) => {
-    const url = `${postBsConf()}/${clientId}`;
+    const url = postBsConf();
 
-    const response = await fetch(url, {
+    const response = await fetch(url + `${clientId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
