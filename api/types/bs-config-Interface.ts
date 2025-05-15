@@ -1,5 +1,4 @@
 export interface BSConfigInterface {
-  endpoint?: string;
   servers: {
     [key: string]: {
       binding: string;

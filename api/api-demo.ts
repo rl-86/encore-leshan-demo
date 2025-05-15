@@ -124,57 +124,24 @@ export const getClient = api(
   }
 );
 
-/* 
-export const postBootstrapConfig = api<BootstrapConfig, void>(
-  { method: 'POST', path: '/api/bsconfig', expose: true, auth: true },
-  async (data) => {
-    const userLogin = username();
-    const pass = password();
-    const authHeader =
-      'Basic ' + Buffer.from(`${userLogin}:${pass}`).toString('base64');
-
-    const url = postBsConf();
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to post config: ${response.statusText}`);
-    }
-  }
-);
-*/
-
 interface PostBootstrapConfigt {
-  clientEndpoint: string;
+  clientId: string;
   config: BSConfigInterface;
 }
 
 export const postBootstrapConfig = api<PostBootstrapConfigt, void>(
   {
     method: 'POST',
-    path: '/api/bootstrap/:clientEndpoint', // <-- dynamisk endpoint
+    path: '/api/bootstrap/:clientId',
     expose: true,
-    auth: true,
+    auth: false,
   },
-  async ({ clientEndpoint, config }) => {
-    const userLogin = username();
-    const pass = password();
-    const authHeader =
-      'Basic ' + Buffer.from(`${userLogin}:${pass}`).toString('base64');
-
-    const url = `${postBsConf()}/${clientEndpoint}`;
+  async ({ clientId, config }) => {
+    const url = `${postBsConf()}/${clientId}`;
 
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        Authorization: authHeader,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(config),
