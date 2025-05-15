@@ -31,6 +31,9 @@
         },
         "clientSecurityConfDelete": {
             "$env": "clientSecurityConfDelete"
+        },
+        "bootstrapDelete": {
+            "$env": "bootstrapDelete"
         }
     }
 }
