@@ -135,7 +135,7 @@ interface PostBootstrapConfigt {
 export const postBootstrapConfig = api<PostBootstrapConfigt, void>(
   {
     method: 'POST',
-    path: '/api/bootstrap/:clientId',
+    path: '/bsclient/:clientId',
     expose: true,
     auth: false,
   },
