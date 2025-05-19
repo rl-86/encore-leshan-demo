@@ -1,7 +1,7 @@
 import { api } from 'encore.dev/api';
 import { secret } from 'encore.dev/config';
-import { BSConfigInterface } from './types/bs-config-Interface';
-
+import { DMConfigInterface } from './types/dm-config-interface';
+import { BSConfigInterface } from './types/bs-config-interface';
 const allClients = secret('clients');
 const objectSpecs = secret('objectSpecs');
 const bootstrap_clients = secret('bootstrap_clients');
@@ -11,6 +11,7 @@ const bootstrapDelete = secret('bootstrapDelete');
 const username = secret('username');
 const password = secret('password');
 const postBsConf = secret('postBsConf');
+const postDmConf = secret('postDmConf');
 
 export const getAllClients = api(
   { method: 'GET', path: '/clients', expose: true, auth: true },
@@ -127,18 +128,19 @@ export const getClient = api(
   }
 );
 
-interface PostBootstrapConfigt {
+interface PostBootstrapConfig {
   clientId: string;
   config: BSConfigInterface;
 }
 
-export const postBootstrapConfig = api<PostBootstrapConfigt, void>(
+export const postBootstrapConfig = api<PostBootstrapConfig, void>(
   {
     method: 'POST',
     path: '/bsclient/:clientId',
     expose: true,
     auth: false,
   },
+
   async ({ clientId, config }) => {
     const url = postBsConf();
 
@@ -200,5 +202,40 @@ export const deleteClientSecurityConf = api(
         `External delete failed: ${response.status} ${errorBody}`
       );
     }
+  }
+);
+
+interface PostClientSecurityConfig {
+  clientId: string;
+  config: DMConfigInterface;
+}
+
+export const postClientSecurityConf = api<PostClientSecurityConfig, void>(
+  { method: 'POST', path: '/client/:clientId', expose: true, auth: false },
+  async ({ clientId, config }) => {
+    const url = postDmConf();
+
+    const response = await fetch(url + `${clientId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(config),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to post config: ${response.statusText}`);
+    }
+  }
+);
+
+// test
+export const testSecrets = api(
+  { method: 'GET', path: '/api/test-secrets', expose: true, auth: false },
+  async () => {
+    return {
+      user: username(),
+      postUrl: postBsConf(),
+    };
   }
 );
