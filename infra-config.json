@@ -1,42 +1,45 @@
 {
-    "$schema": "https://encore.dev/schemas/infra.schema.json",
-    "metadata": {
-        "app_id": "encore-leshan-demo-vnai",
-        "env_name": "development",
-        "env_type": "development",
-        "cloud": "self-hosted",
-        "base_url": "http://localhost/api"
+  "$schema": "https://encore.dev/schemas/infra.schema.json",
+  "metadata": {
+    "app_id": "encore-leshan-demo-vnai",
+    "env_name": "development",
+    "env_type": "development",
+    "cloud": "self-hosted",
+    "base_url": "http://localhost/api"
+  },
+  "secrets": {
+    "username": {
+      "$env": "username"
     },
-    "secrets": {
-        "username": {
-            "$env": "username"
-        },
-        "bootstrap_clients": {
-            "$env": "bootstrap_clients"
-        },
-        "client": {
-            "$env": "client"
-        },
-        "clients": {
-            "$env": "clients"
-        },
-        "objectSpecs": {
-            "$env": "objectSpecs"
-        },
-        "password": {
-            "$env": "password"
-        },
-        "token": {
-            "$env": "token"
-        },
-        "clientSecurityConfDelete": {
-            "$env": "clientSecurityConfDelete"
-        },
-        "bootstrapDelete": {
-            "$env": "bootstrapDelete"
-        },
-        "postBsConf": {
-            "$env": "postBsConf"
-        }
+    "bootstrap_clients": {
+      "$env": "bootstrap_clients"
+    },
+    "client": {
+      "$env": "client"
+    },
+    "clients": {
+      "$env": "clients"
+    },
+    "objectSpecs": {
+      "$env": "objectSpecs"
+    },
+    "password": {
+      "$env": "password"
+    },
+    "token": {
+      "$env": "token"
+    },
+    "clientSecurityConfDelete": {
+      "$env": "clientSecurityConfDelete"
+    },
+    "bootstrapDelete": {
+      "$env": "bootstrapDelete"
+    },
+    "postBsConf": {
+      "$env": "postBsConf"
+    },
+    "postDmConf": {
+      "$env": "postDmConf"
     }
+  }
 }
