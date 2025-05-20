@@ -8,9 +8,6 @@
     "base_url": "http://localhost/api"
   },
   "secrets": {
-    "username": {
-      "$env": "username"
-    },
     "bootstrap_clients": {
       "$env": "bootstrap_clients"
     },
@@ -22,9 +19,6 @@
     },
     "objectSpecs": {
       "$env": "objectSpecs"
-    },
-    "password": {
-      "$env": "password"
     },
     "token": {
       "$env": "token"
