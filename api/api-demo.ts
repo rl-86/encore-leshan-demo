@@ -158,6 +158,25 @@ export const postBootstrapConfig = api<PostBootstrapConfig, void>(
   }
 );
 
+export const postClientSecurityConf = api<DMConfigInterface, void>(
+  { method: 'PUT', path: '/clients', expose: true, auth: false },
+  async (config) => {
+    const url = postDmConf();
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(config),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to post config: ${response.statusText}`);
+    }
+  }
+);
+
 // Delete a specific bootstrap configuration
 export const deleteBsConf = api(
   { method: 'DELETE', path: '/bsclients/:clientId', expose: true, auth: true },
@@ -202,40 +221,5 @@ export const deleteClientSecurityConf = api(
         `External delete failed: ${response.status} ${errorBody}`
       );
     }
-  }
-);
-
-interface PostClientSecurityConfig {
-  clientId: string;
-  config: DMConfigInterface;
-}
-
-export const postClientSecurityConf = api<PostClientSecurityConfig, void>(
-  { method: 'POST', path: '/client/:clientId', expose: true, auth: false },
-  async ({ clientId, config }) => {
-    const url = postDmConf();
-
-    const response = await fetch(url + `${clientId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(config),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to post config: ${response.statusText}`);
-    }
-  }
-);
-
-// test
-export const testSecrets = api(
-  { method: 'GET', path: '/api/test-secrets', expose: true, auth: false },
-  async () => {
-    return {
-      user: username(),
-      postUrl: postBsConf(),
-    };
   }
 );
