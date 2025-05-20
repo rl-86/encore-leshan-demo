@@ -8,7 +8,7 @@ services:
       - "8080"
       - "5783:5683/udp"
 
-  bootstrap:
+  bs:
     build: 
       context: ./bootstrapServer
       dockerfile: Dockerfile.leshan-bsserver
@@ -19,12 +19,12 @@ services:
       - "5684:5684/udp"
 
   encore:
-    image: tony300/encore-leshan-demo:2.0.0
+    image: encore-leshan-demo:2.0.0
     ports:
       - "8080:8080"
     depends_on:
       - dm
-      - bootstrap
+      - bs
     env_file:
       - .env
     command: ["encore", "run"]
@@ -38,5 +38,5 @@ services:
       - ./nginx/.htpasswd:/etc/nginx/.htpasswd:ro
     depends_on:
       - dm
-      - bootstrap
+      - bs
       - encore
