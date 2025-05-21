@@ -1,5 +1,7 @@
 import { api } from 'encore.dev/api';
 import { secret } from 'encore.dev/config';
+import { DMConfigInterface } from './types/dm-config-interface';
+import { BSConfigInterface } from './types/bs-config-interface';
 
 const allClients = secret('clients');
 const objectSpecs = secret('objectSpecs');
@@ -7,7 +9,10 @@ const bootstrap_clients = secret('bootstrap_clients');
 const spescificClient = secret('client');
 const clientSecurityConfDelete = secret('clientSecurityConfDelete');
 const bootstrapDelete = secret('bootstrapDelete');
+const postBsConf = secret('postBsConf');
+const postDmConf = secret('postDmConf');
 
+// Get all the clients configurations
 export const getAllClients = api(
   { method: 'GET', path: '/clients', expose: true, auth: true },
   async (): Promise<{ clients: any }> => {
@@ -101,6 +106,51 @@ export const getClient = api(
     const client = await response.json();
 
     return { client };
+  }
+);
+
+interface PostBootstrapConfig {
+  clientId: string;
+  config: BSConfigInterface;
+}
+
+// Post a bootstrap configuration
+export const postBootstrapConfig = api<PostBootstrapConfig, void>(
+  { method: 'POST', path: '/bsclients/:clientId', expose: true, auth: true },
+  async ({ clientId, config }) => {
+    const url = postBsConf();
+
+    const response = await fetch(url + `${clientId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(config),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to post config: ${response.statusText}`);
+    }
+  }
+);
+
+// Post a client security configuration
+export const postClientSecurityConf = api<DMConfigInterface, void>(
+  { method: 'PUT', path: '/clients', expose: true, auth: true },
+  async (config) => {
+    const url = postDmConf();
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(config),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to post config: ${response.statusText}`);
+    }
   }
 );
 
