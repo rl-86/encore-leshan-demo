@@ -114,14 +114,9 @@ interface PostBootstrapConfig {
   config: BSConfigInterface;
 }
 
+// Post a bootstrap configuration
 export const postBootstrapConfig = api<PostBootstrapConfig, void>(
-  {
-    method: 'POST',
-    path: '/bsclient/:clientId',
-    expose: true,
-    auth: true,
-  },
-
+  { method: 'POST', path: '/bsclients/:clientId', expose: true, auth: true },
   async ({ clientId, config }) => {
     const url = postBsConf();
 
