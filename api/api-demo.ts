@@ -11,6 +11,7 @@ const clientSecurityConfDelete = secret('clientSecurityConfDelete');
 const bootstrapDelete = secret('bootstrapDelete');
 const postBsConf = secret('postBsConf');
 const postDmConf = secret('postDmConf');
+const clientSecurityConf = secret('clientSecurityConf');
 
 // Get all the clients configurations
 export const getAllClients = api(
@@ -108,6 +109,27 @@ export const getClient = api(
     return { client };
   }
 );
+// Get security configurations
+export const getSecurityConf = api(
+  {method: 'GET', path: '/clients/securityconf', expose: true, auth: true},
+  async(): Promise<{securityConf: any}> => {
+    const url = clientSecurityConf();
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+    throw new Error(`Failed to fetch security client configuration: ${response.statusText}`);
+    }
+
+    const securityConf = await response.json();
+    return { securityConf }
+  }
+)
+
 
 interface PostBootstrapConfig {
   clientId: string;
