@@ -40,7 +40,7 @@ Follow these steps to get the project up and running locally:
 
 - Ensure that `infra-config.json` is located in the project root:
   ```
-  encore build docker --config \infra-config.json encore-leshan-demo:1.0.0
+  encore build docker --config \infra-config.json encore-leshan-demo:2.0.0
   ```
 
 **7. Start the stack**

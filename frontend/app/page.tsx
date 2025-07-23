@@ -6,10 +6,10 @@ import SecurityConfigList from "@/components/security-config-list"
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="bg-applio-dark text-white py-8 md:py-16">
+      <div className="bg-applio-dark text-white py-6 md:py-6">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2 md:mb-4">Encore Leshan Demo</h1>
-          <p className="text-lg md:text-xl max-w-2xl">
+          <h1 className="text-2xl md:text-2xl font-bold mb-2 md:mb-2">Encore Leshan Demo</h1>
+          <p className="text-md md:text-1xl max-w-2xl">
             Eclipse Leshan LwM2M Server with an Encore-based backend API for IoT device management
           </p>
         </div>

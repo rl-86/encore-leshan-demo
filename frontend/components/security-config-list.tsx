@@ -10,9 +10,9 @@ import { useMobile } from "@/hooks/use-mobile"
 
 // Mock security config data - replace with actual API call
 const mockSecurityConfigs = [
-  { id: "sec1", endpoint: "device001", securityMode: "OSCORE" },
-  { id: "sec2", endpoint: "device002", securityMode: "Pre-Shared Key" },
-  { id: "sec3", endpoint: "device003", securityMode: "No Security" },
+  { id: "sec1", endpoint: "test-device001", securityMode: "OSCORE" },
+  { id: "sec2", endpoint: "test-device002", securityMode: "Pre-Shared Key" },
+  { id: "sec3", endpoint: "test-device003", securityMode: "No Security" },
 ]
 
 export default function SecurityConfigList() {

@@ -10,9 +10,9 @@ import { useMobile } from "@/hooks/use-mobile"
 
 // Mock bootstrap config data - replace with actual API call
 const mockBootstrapConfigs = [
-  { id: "bs1", endpoint: "device001", serverUrl: "coap://localhost:5683", securityMode: "OSCORE" },
-  { id: "bs2", endpoint: "device002", serverUrl: "coap://localhost:5683", securityMode: "Pre-Shared Key" },
-  { id: "bs3", endpoint: "device003", serverUrl: "coap://localhost:5683", securityMode: "No Security" },
+  { id: "bs1", endpoint: "test-device001", serverUrl: "coap://localhost:5683", securityMode: "OSCORE" },
+  { id: "bs2", endpoint: "test-device002", serverUrl: "coap://localhost:5683", securityMode: "Pre-Shared Key" },
+  { id: "bs3", endpoint: "test-device003", serverUrl: "coap://localhost:5683", securityMode: "No Security" },
 ]
 
 export default function BootstrapConfigList() {
