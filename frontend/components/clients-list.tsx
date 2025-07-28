@@ -66,8 +66,8 @@ export default function ClientsList() {
 
     fetchClients();
 
-    // Optional: Poll every 10s
-    const interval = setInterval(fetchClients, 10000);
+    // Optional: Poll every 60s
+    const interval = setInterval(fetchClients, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -80,8 +80,8 @@ export default function ClientsList() {
             {client.registrationId}
           </CardDescription>
         </div>
-        {client.status === 'ONLINE' ? (
-          <Badge className='bg-applio-teal hover:bg-applio-teal/90 flex items-center gap-1'>
+        {client.status === 'OFFLINE' ? (
+          <Badge className='bg-green-600 flex items-center gap-1'>
             <Wifi className='h-3 w-3' /> Online
           </Badge>
         ) : (
@@ -143,16 +143,16 @@ export default function ClientsList() {
                 {clients.map((client) => (
                   <TableRow key={client.id}>
                     <TableCell>
-                      {client.status === 'ONLINE' ? (
-                        <Badge className='bg-applio-teal hover:bg-applio-teal/90 flex items-center gap-1'>
-                          <Wifi className='h-3 w-3' /> Online
+                      {client.status === 'OFFLINE' ? (
+                        <Badge className='bg-green-600 hover:bg-green-600/90 flex justify-between gap-1 h-6 w-20'>
+                          <Wifi className='h-4 w-4' /> Online
                         </Badge>
                       ) : (
                         <Badge
-                          variant='outline'
-                          className='text-applio-gray flex items-center gap-1'
+                          variant="outline"
+                          className='text-gray-500 flex justify-between gap-1 h-6 w-20'
                         >
-                          <WifiOff className='h-3 w-3' /> Offline
+                          <WifiOff className='h-4 w-4' /> Offline
                         </Badge>
                       )}
                     </TableCell>
