@@ -174,7 +174,7 @@ export default function ConfigurationsTab() {
                   Security Config
                 </th>
                 <th className='text-center p-4 font-semibold text-gray-900'>
-                  Actions
+                  Delete
                 </th>
               </tr>
             </thead>
@@ -198,7 +198,7 @@ export default function ConfigurationsTab() {
                       className='p-2 text-red-600 hover:bg-red-100 rounded-full transition-colors'
                       title={`Delete all configurations for ${config.endpoint}`}
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={18} />
                     </button>
                   </td>
                 </tr>
@@ -245,7 +245,7 @@ function ConfigStatusBadge({ hasConfig }: { hasConfig: boolean }) {
         hasConfig ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
       }`}
     >
-      {hasConfig ? <Check size={16} /> : <X size={16} />}
+      {hasConfig ? <Check size={20} /> : <X size={20} />}
     </div>
   );
 }
