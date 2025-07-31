@@ -40,7 +40,7 @@ export default function ClientsList() {
       try {
         const res = await fetch('/api/clients', {
           headers: {
-            Authorization: process.env.NEXT_PUBLIC_API_TOKEN!,
+            'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
           },
         });
         const data = await res.json();
@@ -149,7 +149,7 @@ export default function ClientsList() {
                         </Badge>
                       ) : (
                         <Badge
-                          variant="outline"
+                          variant='outline'
                           className='text-gray-500 flex justify-between gap-1 h-6 w-20'
                         >
                           <WifiOff className='h-4 w-4' /> Offline
