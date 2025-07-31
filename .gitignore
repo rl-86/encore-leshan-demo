@@ -5,5 +5,10 @@ encore.gen.cue
 node_modules
 /encore.gen
 .env
+.env.local
 .htpasswd
 .secrets.local.cue
+Californium3.properties
+backend/client_commands.txt
+backend/infra-config.txt
+backend/start_all_clients.bat
