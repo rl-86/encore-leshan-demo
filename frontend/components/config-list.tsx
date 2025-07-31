@@ -1,6 +1,6 @@
 // components/ConfigurationsTab.tsx
 import { useState, useEffect } from 'react';
-import { Trash2, Check, X, RefreshCw } from 'lucide-react';
+import { Trash2, Check, X, RefreshCw, AlertTriangle } from 'lucide-react';
 
 interface DeviceConfig {
   endpoint: string;
@@ -11,6 +11,7 @@ interface DeviceConfig {
 export default function ConfigurationsTab() {
   const [configs, setConfigs] = useState<DeviceConfig[]>([]);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Hämta alla configs från båda endpoints
   const loadConfigs = async () => {
@@ -127,6 +128,88 @@ export default function ConfigurationsTab() {
     }
   };
 
+  // Ta bort ALLA configs för alla endpoints
+  const deleteAllConfigs = async () => {
+    const totalConfigs = configs.filter(
+      (c) => c.hasBootstrapConfig || c.hasSecurityConfig
+    ).length;
+
+    if (totalConfigs === 0) {
+      alert('No configurations to delete.');
+      return;
+    }
+
+    const confirmMessage =
+      `Delete ALL configurations!\n\n` +
+      `This will remove:\n` +
+      `• ${
+        configs.filter((c) => c.hasBootstrapConfig).length
+      } Bootstrap configurations\n` +
+      `• ${
+        configs.filter((c) => c.hasSecurityConfig).length
+      } Security configurations\n` +
+      `• Total of ${totalConfigs} configurations\n\n`;
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    setDeleting(true);
+
+    try {
+      const deletePromises: Promise<Response>[] = [];
+
+      // Gå igenom alla configs och skapa delete requests
+      configs.forEach((config) => {
+        // Ta bort bootstrap config om den finns
+        if (config.hasBootstrapConfig) {
+          deletePromises.push(
+            fetch(`http://localhost/api/bsclients/${config.endpoint}`, {
+              method: 'DELETE',
+              headers: {
+                'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
+              },
+            })
+          );
+        }
+
+        // Ta bort security config om den finns
+        if (config.hasSecurityConfig) {
+          deletePromises.push(
+            fetch(`http://localhost/api/clients/${config.endpoint}`, {
+              method: 'DELETE',
+              headers: {
+                'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
+              },
+            })
+          );
+        }
+      });
+
+      // Kör alla delete requests parallellt
+      const results = await Promise.allSettled(deletePromises);
+
+      // Kontrollera om några requests failade
+      const failed = results.filter((result) => result.status === 'rejected');
+      if (failed.length > 0) {
+        console.error('Some delete requests failed:', failed);
+        alert(
+          `Warning: ${failed.length} delete requests failed. Please check the console for details.`
+        );
+      }
+
+      // Rensa local state
+      setConfigs([]);
+    } catch (error) {
+      console.error('Error deleting all configs:', error);
+      alert(
+        'Error occurred while deleting configurations. Please check the console for details.'
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   // Ladda configs när komponenten mountas
   useEffect(() => {
     loadConfigs();
@@ -144,21 +227,53 @@ export default function ConfigurationsTab() {
             Manage LwM2M client bootstrap and security configurations
           </p>
         </div>
-        <button
-          onClick={loadConfigs}
-          disabled={loading}
-          className='bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg flex items-center gap-2'
-        >
-          <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
-          {loading ? 'Loading...' : 'Refresh'}
-        </button>
+        <div className='flex gap-3'>
+          <button
+            onClick={loadConfigs}
+            disabled={loading || deleting}
+            className='bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg flex items-center gap-2'
+          >
+            <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
+            {loading ? 'Loading...' : 'Refresh'}
+          </button>
+
+          {/* Delete All Button */}
+          <button
+            onClick={deleteAllConfigs}
+            disabled={deleting || loading || configs.length === 0}
+            className='bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded-lg flex items-center gap-2'
+          >
+            <AlertTriangle size={20} />
+            {deleting ? 'Deleting All...' : 'Delete All Configs'}
+          </button>
+        </div>
       </div>
+
+      {/* Warning Banner when deleting */}
+      {deleting && (
+        <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
+          <div className='flex items-center gap-2 text-red-800'>
+            <AlertTriangle size={20} />
+            <span className='font-semibold'>
+              Deleting all configurations...
+            </span>
+          </div>
+          <p className='text-red-700 text-sm mt-1'>
+            Please wait while all bootstrap and security configurations are
+            being removed.
+          </p>
+        </div>
+      )}
 
       {/* Configurations Table */}
       <div className='bg-white rounded-lg shadow-sm border overflow-hidden'>
         {configs.length === 0 ? (
           <div className='p-8 text-center text-gray-500'>
-            {loading ? 'Loading configurations...' : 'No configurations found'}
+            {loading
+              ? 'Loading configurations...'
+              : deleting
+              ? 'Deleting configurations...'
+              : 'No configurations found'}
           </div>
         ) : (
           <table className='w-full'>
@@ -181,8 +296,8 @@ export default function ConfigurationsTab() {
             <tbody className='divide-y divide-gray-200'>
               {configs.map((config) => (
                 <tr key={config.endpoint} className='hover:bg-gray-50'>
-                  <td className='p-4'>
-                    <span className='font-medium text-gray-900'>
+                  <td className='p-3'>
+                    <span className='font-medium text-sm text-gray-900'>
                       {config.endpoint}
                     </span>
                   </td>
@@ -195,7 +310,8 @@ export default function ConfigurationsTab() {
                   <td className='p-4 text-center'>
                     <button
                       onClick={() => deleteConfig(config.endpoint)}
-                      className='p-2 text-red-600 hover:bg-red-100 rounded-full transition-colors'
+                      disabled={deleting}
+                      className='p-2 text-red-700 hover:bg-red-100 disabled:text-red-400 disabled:hover:bg-transparent rounded-full transition-colors'
                       title={`Delete all configurations for ${config.endpoint}`}
                     >
                       <Trash2 size={18} />
@@ -242,10 +358,10 @@ function ConfigStatusBadge({ hasConfig }: { hasConfig: boolean }) {
   return (
     <div
       className={`w-8 h-8 rounded-full flex items-center justify-center ${
-        hasConfig ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+        hasConfig ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
       }`}
     >
-      {hasConfig ? <Check size={20} /> : <X size={20} />}
+      {hasConfig ? <Check size={18} /> : <X size={18} />}
     </div>
   );
 }

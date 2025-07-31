@@ -156,7 +156,9 @@ export default function ClientsList() {
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell>{client.endpoint}</TableCell>
+                    <TableCell className='font-medium text-sm'>
+                      {client.endpoint}
+                    </TableCell>
                     <TableCell>{client.registrationId}</TableCell>
                     <TableCell>{client.address}</TableCell>
                     <TableCell>
