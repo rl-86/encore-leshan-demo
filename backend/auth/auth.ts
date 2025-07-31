@@ -1,33 +1,35 @@
-import { Header, Gateway, APIError } from "encore.dev/api";
-import { authHandler } from "encore.dev/auth";
-import { secret } from "encore.dev/config";
+import { Header, Gateway, APIError } from 'encore.dev/api';
+import { authHandler } from 'encore.dev/auth';
+import { secret } from 'encore.dev/config';
 
 const secretToken = secret('token');
 
 interface AuthParams {
-    authorization: Header<"Authorization">;
+  apiToken: Header<'X-Auth-Token'>;
 }
 
 interface AuthData {
-    userID: string;
+  userID: string;
 }
 
-export const myAuthHandler = authHandler(async (params: AuthParams): Promise<AuthData> => {
-    const token = params.authorization.replace("Bearer", "");
+export const myAuthHandler = authHandler(
+  async (params: AuthParams): Promise<AuthData> => {
+    const token = params.apiToken;
 
     if (!token) {
-        throw APIError.unauthenticated("no token provided");
+      throw APIError.unauthenticated('no token provided');
     }
 
     const expectedToken = secretToken();
 
     // Compare the token from the request with the expected secret.
     if (token !== expectedToken) {
-        throw APIError.unauthenticated("Invalid token");
+      throw APIError.unauthenticated('Invalid token');
     }
 
-    return { userID: "userID123" };
-});
+    return { userID: 'userID123' };
+  }
+);
 
 // Define the API Gateway that will execute the auth handler:
-export const myGateway = new Gateway({ authHandler: myAuthHandler })
+export const myGateway = new Gateway({ authHandler: myAuthHandler });
