@@ -20,7 +20,7 @@ export default function Home() {
 
       <div className='container mx-auto px-4 py-6 md:py-8 flex-grow'>
         <Tabs defaultValue='clients' className='w-full'>
-          <TabsList className='grid w-50 grid-cols-2 mb-6 md:mb-8 overflow-x-auto'>
+          <TabsList className='grid w-50 grid-cols-2 mb-6 md:mb-8 overflow-hidden border shadow-sm'>
             <TabsTrigger
               value='configs'
               className='data-[state=active]:bg-applio-teal data-[state=active]:text-white text-xs md:text-sm'
