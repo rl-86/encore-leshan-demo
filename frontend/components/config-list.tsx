@@ -1,6 +1,22 @@
-// components/ConfigurationsTab.tsx
 import { useState, useEffect } from 'react';
-import { Trash2, Check, X, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Trash2, Check, X, RefreshCw, AlertTriangle, Plus } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import ConfigAddModal from './config-add-modal';
 
 interface DeviceConfig {
   endpoint: string;
@@ -8,10 +24,13 @@ interface DeviceConfig {
   hasSecurityConfig: boolean;
 }
 
-export default function ConfigurationsTab() {
+export default function ConfigsList() {
   const [configs, setConfigs] = useState<DeviceConfig[]>([]);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showConfigDialog, setShowConfigDialog] = useState(false);
+
+  const baseURL = 'http://localhost/api';
 
   // Hämta alla configs från båda endpoints
   const loadConfigs = async () => {
@@ -19,13 +38,13 @@ export default function ConfigurationsTab() {
     try {
       // Hämta security och bootstrap configs parallellt
       const [securityResponse, bootstrapResponse] = await Promise.all([
-        fetch('http://localhost/api/clients/securityconf', {
+        fetch(`${baseURL}/clients/securityconf`, {
           headers: {
             'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
             'Accept': 'application/json',
           },
         }),
-        fetch('http://localhost/api/bsclients', {
+        fetch(`${baseURL}/bsclients`, {
           headers: {
             'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
             'Accept': 'application/json',
@@ -78,6 +97,19 @@ export default function ConfigurationsTab() {
     }
   };
 
+  const openConfigDialog = () => {
+    setShowConfigDialog(true);
+  };
+
+  const closeConfigDialog = () => {
+    setShowConfigDialog(false);
+  };
+
+  const handleConfigGenerated = () => {
+    // Refresh the configs list after new configs are generated
+    loadConfigs();
+  };
+
   // Ta bort både bootstrap och security config för en endpoint
   const deleteConfig = async (endpoint: string) => {
     if (
@@ -97,7 +129,7 @@ export default function ConfigurationsTab() {
       // Ta bort bootstrap config om den finns
       if (config.hasBootstrapConfig) {
         deletePromises.push(
-          fetch(`http://localhost/api/bsclients/${endpoint}`, {
+          fetch(`${baseURL}/bsclients/${endpoint}`, {
             method: 'DELETE',
             headers: {
               'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
@@ -109,7 +141,7 @@ export default function ConfigurationsTab() {
       // Ta bort security config om den finns
       if (config.hasSecurityConfig) {
         deletePromises.push(
-          fetch(`http://localhost/api/clients/${endpoint}`, {
+          fetch(`${baseURL}/clients/${endpoint}`, {
             method: 'DELETE',
             headers: {
               'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
@@ -164,7 +196,7 @@ export default function ConfigurationsTab() {
         // Ta bort bootstrap config om den finns
         if (config.hasBootstrapConfig) {
           deletePromises.push(
-            fetch(`http://localhost/api/bsclients/${config.endpoint}`, {
+            fetch(`${baseURL}/bsclients/${config.endpoint}`, {
               method: 'DELETE',
               headers: {
                 'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
@@ -176,7 +208,7 @@ export default function ConfigurationsTab() {
         // Ta bort security config om den finns
         if (config.hasSecurityConfig) {
           deletePromises.push(
-            fetch(`http://localhost/api/clients/${config.endpoint}`, {
+            fetch(`${baseURL}/clients/${config.endpoint}`, {
               method: 'DELETE',
               headers: {
                 'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
@@ -217,38 +249,6 @@ export default function ConfigurationsTab() {
 
   return (
     <div className='space-y-6'>
-      {/* Header */}
-      <div className='flex justify-between items-center'>
-        <div>
-          <h2 className='text-2xl font-bold text-gray-900'>
-            Device Configurations
-          </h2>
-          <p className='text-gray-600'>
-            Manage LwM2M client bootstrap and security configurations
-          </p>
-        </div>
-        <div className='flex gap-3'>
-          <button
-            onClick={loadConfigs}
-            disabled={loading || deleting}
-            className='bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg flex items-center gap-2'
-          >
-            <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
-            {loading ? 'Loading...' : 'Refresh'}
-          </button>
-
-          {/* Delete All Button */}
-          <button
-            onClick={deleteAllConfigs}
-            disabled={deleting || loading || configs.length === 0}
-            className='bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded-lg flex items-center gap-2'
-          >
-            <AlertTriangle size={20} />
-            {deleting ? 'Deleting All...' : 'Delete All Configs'}
-          </button>
-        </div>
-      </div>
-
       {/* Warning Banner when deleting */}
       {deleting && (
         <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
@@ -265,89 +265,146 @@ export default function ConfigurationsTab() {
         </div>
       )}
 
-      {/* Configurations Table */}
-      <div className='bg-white rounded-lg shadow-sm border overflow-hidden'>
-        {configs.length === 0 ? (
-          <div className='p-8 text-center text-gray-500'>
-            {loading
-              ? 'Loading configurations...'
-              : deleting
-              ? 'Deleting configurations...'
-              : 'No configurations found'}
+      <Card className='border shadow-sm'>
+        <CardHeader className='bg-gray-100'>
+          <div className='flex justify-between items-center h-12'>
+            <div>
+              <CardTitle>Device Configurations</CardTitle>
+              <CardDescription>
+                Manage LwM2M client bootstrap and security configurations
+              </CardDescription>
+            </div>
+            <div className='flex gap-3'>
+              <Button
+                onClick={loadConfigs}
+                disabled={loading || deleting}
+                variant='outline'
+                className='flex items-center gap-2'
+              >
+                <RefreshCw
+                  size={20}
+                  className={loading ? 'animate-spin' : ''}
+                />
+                {loading ? 'Loading...' : 'Refresh'}
+              </Button>
+              {/* Button to open Add Config dialog */}
+              <Button
+                onClick={openConfigDialog}
+                disabled={deleting || loading}
+                variant='default'
+                className='flex items-center gap-2'
+              >
+                <Plus size={20} />
+                Add New Configs
+              </Button>
+              <Button
+                onClick={deleteAllConfigs}
+                disabled={deleting || loading || configs.length === 0}
+                variant='destructive'
+                className='flex items-center gap-2'
+              >
+                <AlertTriangle size={20} />
+                {deleting ? 'Deleting All...' : 'Delete All Configs'}
+              </Button>
+            </div>
           </div>
-        ) : (
-          <table className='w-full'>
-            <thead className='bg-gray-50'>
-              <tr>
-                <th className='text-left p-4 font-semibold text-gray-900'>
-                  Client Endpoint
-                </th>
-                <th className='text-center p-4 font-semibold text-gray-900'>
-                  Bootstrap Config
-                </th>
-                <th className='text-center p-4 font-semibold text-gray-900'>
-                  Security Config
-                </th>
-                <th className='text-center p-4 font-semibold text-gray-900'>
-                  Delete
-                </th>
-              </tr>
-            </thead>
-            <tbody className='divide-y divide-gray-200'>
-              {configs.map((config) => (
-                <tr key={config.endpoint} className='hover:bg-gray-50'>
-                  <td className='p-3'>
-                    <span className='font-medium text-sm text-gray-900'>
-                      {config.endpoint}
-                    </span>
-                  </td>
-                  <td className='p-4 text-center'>
-                    <ConfigStatusBadge hasConfig={config.hasBootstrapConfig} />
-                  </td>
-                  <td className='p-4 text-center'>
-                    <ConfigStatusBadge hasConfig={config.hasSecurityConfig} />
-                  </td>
-                  <td className='p-4 text-center'>
-                    <button
-                      onClick={() => deleteConfig(config.endpoint)}
-                      disabled={deleting}
-                      className='p-2 text-red-700 hover:bg-red-100 disabled:text-red-400 disabled:hover:bg-transparent rounded-full transition-colors'
-                      title={`Delete all configurations for ${config.endpoint}`}
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+        </CardHeader>
+        <CardContent className='p-0'>
+          {configs.length === 0 ? (
+            <div className='text-center py-8 text-gray-500'>
+              {loading
+                ? 'Loading configurations...'
+                : deleting
+                ? 'Deleting configurations...'
+                : 'No configurations found'}
+            </div>
+          ) : (
+            <div className='overflow-x-auto'>
+              <Table>
+                <TableHeader>
+                  <TableRow className='bg-gray-100 border-t-2'>
+                    <TableHead>Client Endpoint</TableHead>
+                    <TableHead className='text-center'>
+                      Bootstrap Config
+                    </TableHead>
+                    <TableHead className='text-center'>
+                      Security Config
+                    </TableHead>
+                    <TableHead className='text-center'>Delete</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {configs.map((config) => (
+                    <TableRow key={config.endpoint}>
+                      <TableCell className='font-medium text-sm'>
+                        {config.endpoint}
+                      </TableCell>
+                      <TableCell className='text-center'>
+                        <ConfigStatusBadge
+                          hasConfig={config.hasBootstrapConfig}
+                        />
+                      </TableCell>
+                      <TableCell className='text-center'>
+                        <ConfigStatusBadge
+                          hasConfig={config.hasSecurityConfig}
+                        />
+                      </TableCell>
+                      <TableCell className='text-center'>
+                        <button
+                          onClick={() => deleteConfig(config.endpoint)}
+                          disabled={deleting}
+                          className='p-2 text-red-700 hover:bg-red-100 disabled:text-red-400 disabled:hover:bg-transparent rounded-full transition-colors'
+                          title={`Delete all configurations for ${config.endpoint}`}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Add Config Modal */}
+      <ConfigAddModal
+        isOpen={showConfigDialog}
+        onClose={closeConfigDialog}
+        onConfigGenerated={handleConfigGenerated}
+      />
 
       {/* Summary */}
       {configs.length > 0 && (
-        <div className='bg-gray-50 rounded-lg p-4'>
-          <div className='grid grid-cols-3 gap-4 text-center'>
-            <div>
-              <div className='text-2xl font-bold text-gray-900'>
-                {configs.length}
+        <Card className='border shadow-sm'>
+          <CardContent className='p-6'>
+            <div className='grid grid-cols-3 gap-4 text-center'>
+              <div>
+                <div className='text-2xl font-bold text-gray-900'>
+                  {configs.length}
+                </div>
+                <div className='text-sm text-gray-600'>Total Endpoints</div>
               </div>
-              <div className='text-sm text-gray-600'>Total Endpoints</div>
-            </div>
-            <div>
-              <div className='text-2xl font-bold text-blue-600'>
-                {configs.filter((c) => c.hasBootstrapConfig).length}
+              <div>
+                <div className='text-2xl font-bold text-blue-600'>
+                  {configs.filter((c) => c.hasBootstrapConfig).length}
+                </div>
+                <div className='text-sm text-gray-600'>
+                  With Bootstrap Config
+                </div>
               </div>
-              <div className='text-sm text-gray-600'>With Bootstrap Config</div>
-            </div>
-            <div>
-              <div className='text-2xl font-bold text-green-600'>
-                {configs.filter((c) => c.hasSecurityConfig).length}
+              <div>
+                <div className='text-2xl font-bold text-green-600'>
+                  {configs.filter((c) => c.hasSecurityConfig).length}
+                </div>
+                <div className='text-sm text-gray-600'>
+                  With Security Config
+                </div>
               </div>
-              <div className='text-sm text-gray-600'>With Security Config</div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
@@ -357,11 +414,11 @@ export default function ConfigurationsTab() {
 function ConfigStatusBadge({ hasConfig }: { hasConfig: boolean }) {
   return (
     <div
-      className={`w-8 h-8 rounded-full flex items-center justify-center ${
+      className={`w-7 h-7 rounded-full flex items-center justify-center ${
         hasConfig ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
       }`}
     >
-      {hasConfig ? <Check size={18} /> : <X size={18} />}
+      {hasConfig ? <Check size={16} /> : <X size={16} />}
     </div>
   );
 }
