@@ -36,11 +36,7 @@ export default function ClientsList() {
     const fetchClients = async () => {
       setLoading(true);
       try {
-        const res = await fetch('/api/clients', {
-          headers: {
-            'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
-          },
-        });
+        const res = await fetch('/api/clients', {});
         const data = await res.json();
 
         const mapped = data.clients.map((c: any) => ({

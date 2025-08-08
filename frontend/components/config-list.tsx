@@ -30,26 +30,14 @@ export default function ConfigsList() {
   const [deleting, setDeleting] = useState(false);
   const [showConfigDialog, setShowConfigDialog] = useState(false);
 
-  const baseURL = 'http://localhost/api';
-
-  // Hämta alla configs från båda endpoints
+  // Hämta alla configs från båda endpoints via Next.js API
   const loadConfigs = async () => {
     setLoading(true);
     try {
-      // Hämta security och bootstrap configs parallellt
-      const [securityResponse, bootstrapResponse] = await Promise.all([
-        fetch(`${baseURL}/clients/securityconf`, {
-          headers: {
-            'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
-            'Accept': 'application/json',
-          },
-        }),
-        fetch(`${baseURL}/bsclients`, {
-          headers: {
-            'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
-            'Accept': 'application/json',
-          },
-        }),
+      // Hämta security och bootstrap configs parallellt via Next.js API
+      const [bootstrapResponse, securityResponse] = await Promise.all([
+        fetch('/api/bsconfig'),
+        fetch('/api/securityconfig'),
       ]);
 
       if (!bootstrapResponse.ok) {
@@ -91,7 +79,11 @@ export default function ConfigsList() {
       setConfigs(combinedConfigs);
     } catch (error) {
       console.error('Error loading configs:', error);
-      // Här kan du visa en toast/notification för fel
+      alert(
+        `Failed to load configurations: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      );
     } finally {
       setLoading(false);
     }
@@ -126,10 +118,10 @@ export default function ConfigsList() {
 
       const deletePromises = [];
 
-      // Ta bort bootstrap config om den finns
+      // Ta bort bootstrap config om den finns via Next.js API
       if (config.hasBootstrapConfig) {
         deletePromises.push(
-          fetch(`${baseURL}/bsclients/${endpoint}`, {
+          fetch(`/api/bsconfig/${endpoint}`, {
             method: 'DELETE',
             headers: {
               'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
@@ -138,10 +130,10 @@ export default function ConfigsList() {
         );
       }
 
-      // Ta bort security config om den finns
+      // Ta bort security config om den finns via Next.js API
       if (config.hasSecurityConfig) {
         deletePromises.push(
-          fetch(`${baseURL}/clients/${endpoint}`, {
+          fetch(`/api/securityconfig/${endpoint}`, {
             method: 'DELETE',
             headers: {
               'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
@@ -150,13 +142,27 @@ export default function ConfigsList() {
         );
       }
 
-      await Promise.all(deletePromises);
+      const results = await Promise.allSettled(deletePromises);
 
-      // Ta bort från local state
+      // Kontrollera om några requests failade
+      const failed = results.filter((result) => result.status === 'rejected');
+      if (failed.length > 0) {
+        console.error('Some delete requests failed:', failed);
+        alert(
+          `Warning: ${failed.length} delete requests failed for ${endpoint}`
+        );
+        return;
+      }
+
+      // Ta bort från local state endast om alla deletes lyckades
       setConfigs((prev) => prev.filter((c) => c.endpoint !== endpoint));
     } catch (error) {
       console.error('Error deleting config:', error);
-      // Här kan du visa en toast/notification för fel
+      alert(
+        `Failed to delete configurations for ${endpoint}: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      );
     }
   };
 
@@ -180,7 +186,8 @@ export default function ConfigsList() {
       `• ${
         configs.filter((c) => c.hasSecurityConfig).length
       } Security configurations\n` +
-      `• Total of ${totalConfigs} configurations\n\n`;
+      `• Total of ${totalConfigs} configurations\n\n` +
+      `Are you sure you want to continue?`;
 
     if (!confirm(confirmMessage)) {
       return;
@@ -191,12 +198,12 @@ export default function ConfigsList() {
     try {
       const deletePromises: Promise<Response>[] = [];
 
-      // Gå igenom alla configs och skapa delete requests
+      // Gå igenom alla configs och skapa delete requests via Next.js API
       configs.forEach((config) => {
         // Ta bort bootstrap config om den finns
         if (config.hasBootstrapConfig) {
           deletePromises.push(
-            fetch(`${baseURL}/bsclients/${config.endpoint}`, {
+            fetch(`/api/bsconfig/${config.endpoint}`, {
               method: 'DELETE',
               headers: {
                 'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
@@ -208,7 +215,7 @@ export default function ConfigsList() {
         // Ta bort security config om den finns
         if (config.hasSecurityConfig) {
           deletePromises.push(
-            fetch(`${baseURL}/clients/${config.endpoint}`, {
+            fetch(`/api/securityconfig/${config.endpoint}`, {
               method: 'DELETE',
               headers: {
                 'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
@@ -226,7 +233,7 @@ export default function ConfigsList() {
       if (failed.length > 0) {
         console.error('Some delete requests failed:', failed);
         alert(
-          `Warning: ${failed.length} delete requests failed. Please check the console for details.`
+          `Warning: ${failed.length} of ${deletePromises.length} delete requests failed. Check console for details.`
         );
       }
 
@@ -235,7 +242,9 @@ export default function ConfigsList() {
     } catch (error) {
       console.error('Error deleting all configs:', error);
       alert(
-        'Error occurred while deleting configurations. Please check the console for details.'
+        `Error occurred while deleting configurations: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
       );
     } finally {
       setDeleting(false);
