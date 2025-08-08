@@ -335,9 +335,9 @@ async function main() {
 
   // Konfiguration
   const config = {
-    devicePrefix: 'Sensor', // Kan ändras till "Sensor", "Node", etc.
-    startNumber: 1, // Börja från nummer 1
-    count: 10, // Antal enheter
+    devicePrefix: 'TEST',
+    startNumber: 1,
+    count: 3,
     paddingLength: 2, // Antal siffror (001, 002, etc.)
   };
 

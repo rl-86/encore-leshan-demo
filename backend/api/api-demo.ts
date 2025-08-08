@@ -109,10 +109,10 @@ export const getClient = api(
     return { client };
   }
 );
-// Get security configurations
+// Get all security configurations
 export const getSecurityConf = api(
-  {method: 'GET', path: '/clients/securityconf', expose: true, auth: true},
-  async(): Promise<{securityConf: any}> => {
+  { method: 'GET', path: '/clients/securityconf', expose: true, auth: true },
+  async (): Promise<{ securityConf: any }> => {
     const url = clientSecurityConf();
     const response = await fetch(url, {
       method: 'GET',
@@ -122,14 +122,15 @@ export const getSecurityConf = api(
     });
 
     if (!response.ok) {
-    throw new Error(`Failed to fetch security client configuration: ${response.statusText}`);
+      throw new Error(
+        `Failed to fetch security client configuration: ${response.statusText}`
+      );
     }
 
     const securityConf = await response.json();
-    return { securityConf }
+    return { securityConf };
   }
-)
-
+);
 
 interface PostBootstrapConfig {
   clientId: string;
@@ -197,7 +198,7 @@ export const deleteBsConf = api(
   }
 );
 
-// Delete a client security configuration
+// Delete a specific client security configuration
 export const deleteClientSecurityConf = api(
   { method: 'DELETE', path: '/clients/:clientId', expose: true, auth: true },
   async ({ clientId }: { clientId: string }): Promise<void> => {

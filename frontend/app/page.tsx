@@ -9,11 +9,11 @@ export default function Home() {
       <div className='bg-applio-dark text-white py-6 md:py-6'>
         <div className='container mx-auto px-4'>
           <h1 className='text-2xl md:text-2xl font-bold mb-2 md:mb-2'>
-            Encore Leshan Demo
+            Leshan (Demo) LwM2M Manager
           </h1>
           <p className='text-md md:text-1xl max-w-2xl'>
-            Eclipse Leshan LwM2M Server with an Encore-based backend API for IoT
-            device management
+            Next.js frontend for managing LwM2M configurations and connected
+            devices via Encore backend API.
           </p>
         </div>
       </div>
