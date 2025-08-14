@@ -1,6 +1,5 @@
 // components/config-add-modal.tsx
 import { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -11,20 +10,13 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-
-interface ConfigGeneratorParams {
-  devicePrefix: string;
-  startNumber: number;
-  count: number;
-  paddingLength: number;
-}
+import { ConfigGeneratorParams } from '@/lib/types';
 
 interface ConfigAddModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfigGenerated: () => void; // Callback to refresh the configs list
+  onConfigGenerated: () => void;
 }
 
 export default function ConfigAddModal({
@@ -33,24 +25,21 @@ export default function ConfigAddModal({
   onConfigGenerated,
 }: ConfigAddModalProps) {
   const [generating, setGenerating] = useState(false);
-  const [useRandomStart, setUseRandomStart] = useState(false);
 
-  // Form state för nya configs
   const [configForm, setConfigForm] = useState<ConfigGeneratorParams>({
-    devicePrefix: 'Sensor',
+    devicePrefix: 'Device',
     startNumber: 1,
     count: 5,
-    paddingLength: 2,
+    paddingLength: 1,
   });
 
   const resetForm = () => {
     setConfigForm({
-      devicePrefix: 'Sensor',
+      devicePrefix: 'Device',
       startNumber: 1,
       count: 5,
-      paddingLength: 2,
+      paddingLength: 1,
     });
-    setUseRandomStart(false);
   };
 
   const handleClose = () => {
@@ -58,29 +47,17 @@ export default function ConfigAddModal({
     onClose();
   };
 
-  const generateRandomStart = () => {
-    // Generate 10-digit random number
-    const randomNum = Math.floor(Math.random() * 9000000000) + 1000000000;
-    setConfigForm((prev) => ({ ...prev, startNumber: randomNum }));
-  };
-
   const handleGenerateConfigs = async () => {
     setGenerating(true);
     try {
-      // If using random start, generate it now
       const finalConfig = {
         ...configForm,
-        startNumber: useRandomStart
-          ? Math.floor(Math.random() * 9000000000) + 1000000000
-          : configForm.startNumber,
       };
 
-      // Call your configGenerator.ts logic here
-      const response = await fetch('/api/generate-configs', {
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Auth-Token': process.env.NEXT_PUBLIC_API_TOKEN!,
         },
         body: JSON.stringify(finalConfig),
       });
@@ -92,13 +69,9 @@ export default function ConfigAddModal({
       const result = await response.json();
       console.log('Generated configs:', result);
 
-      // Call callback to refresh configs list
       onConfigGenerated();
-
-      // Close dialog and reset form
       handleClose();
 
-      // Show success message
       alert(
         `Successfully generated ${finalConfig.count} device configurations!`
       );
@@ -112,14 +85,6 @@ export default function ConfigAddModal({
     }
   };
 
-  // Generate effect for random start checkbox
-  useEffect(() => {
-    if (useRandomStart) {
-      generateRandomStart();
-    }
-  }, [useRandomStart]);
-
-  // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
       resetForm();
@@ -139,6 +104,7 @@ export default function ConfigAddModal({
         </DialogHeader>
 
         <div className='grid gap-6 py-4'>
+          {/* Resten av din kod är perfekt som den är... */}
           {/* Device Prefix */}
           <div className='grid gap-2'>
             <Label htmlFor='devicePrefix'>Device Prefix</Label>
@@ -162,18 +128,7 @@ export default function ConfigAddModal({
           {/* Start Number */}
           <div className='grid gap-2'>
             <Label htmlFor='startNumber'>Start Number</Label>
-            <div className='flex items-center space-x-2'>
-              <Checkbox
-                id='useRandom'
-                checked={useRandomStart}
-                onCheckedChange={(checked) =>
-                  setUseRandomStart(checked === true)
-                }
-              />
-              <Label htmlFor='useRandom' className='text-sm'>
-                Use random 10-digit start number
-              </Label>
-            </div>
+            <div className='flex items-center space-x-2'></div>
             <Input
               id='startNumber'
               type='number'
@@ -184,20 +139,8 @@ export default function ConfigAddModal({
                   startNumber: parseInt(e.target.value) || 1,
                 }))
               }
-              disabled={useRandomStart}
               min='1'
             />
-            {useRandomStart && (
-              <Button
-                type='button'
-                variant='outline'
-                size='sm'
-                onClick={generateRandomStart}
-                className='w-fit'
-              >
-                Generate New Random Number
-              </Button>
-            )}
           </div>
 
           {/* Count */}
