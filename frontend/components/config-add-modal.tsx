@@ -1,5 +1,5 @@
 // components/config-add-modal.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,12 +11,17 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { ConfigGeneratorParams } from '@/lib/types';
+import type { ConfigGeneratorParams } from '@/lib/types';
 
 interface ConfigAddModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfigGenerated: () => void;
+}
+
+function clamp(n: number, min: number, max: number) {
+  if (Number.isNaN(n)) return min;
+  return Math.max(min, Math.min(max, n));
 }
 
 export default function ConfigAddModal({
@@ -42,24 +47,43 @@ export default function ConfigAddModal({
     });
   };
 
+  // ---- Validering (matchar backend) ----
+  const errors = useMemo(() => {
+    return {
+      devicePrefix: configForm.devicePrefix.trim()
+        ? ''
+        : 'Device prefix is required',
+      startNumber:
+        configForm.startNumber >= 1 ? '' : 'Start number must be ≥ 1',
+      count:
+        configForm.count >= 1 && configForm.count <= 100
+          ? ''
+          : 'Count must be between 1 and 100',
+      paddingLength:
+        configForm.paddingLength >= 1 && configForm.paddingLength <= 6
+          ? ''
+          : 'Padding length must be between 1 and 6',
+    };
+  }, [configForm]);
+
+  const isValid = useMemo(
+    () => Object.values(errors).every((e) => !e),
+    [errors]
+  );
+
   const handleClose = () => {
     resetForm();
     onClose();
   };
 
   const handleGenerateConfigs = async () => {
+    if (!isValid) return; // extra skydd
     setGenerating(true);
     try {
-      const finalConfig = {
-        ...configForm,
-      };
-
       const response = await fetch('/api/generate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(finalConfig),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(configForm),
       });
 
       if (!response.ok) {
@@ -73,7 +97,7 @@ export default function ConfigAddModal({
       handleClose();
 
       alert(
-        `Successfully generated ${finalConfig.count} device configurations!`
+        `Successfully generated ${configForm.count} device configurations!`
       );
     } catch (error) {
       console.error('Error generating configs:', error);
@@ -86,9 +110,7 @@ export default function ConfigAddModal({
   };
 
   useEffect(() => {
-    if (!isOpen) {
-      resetForm();
-    }
+    if (!isOpen) resetForm();
   }, [isOpen]);
 
   return (
@@ -104,7 +126,6 @@ export default function ConfigAddModal({
         </DialogHeader>
 
         <div className='grid gap-6 py-4'>
-          {/* Resten av din kod är perfekt som den är... */}
           {/* Device Prefix */}
           <div className='grid gap-2'>
             <Label htmlFor='devicePrefix'>Device Prefix</Label>
@@ -118,29 +139,47 @@ export default function ConfigAddModal({
                 }))
               }
               placeholder='e.g., Sensor, Node, Device'
+              required
+              aria-invalid={!!errors.devicePrefix}
+              aria-describedby='devicePrefix-error'
             />
+            {errors.devicePrefix && (
+              <p id='devicePrefix-error' className='text-sm text-red-600'>
+                {errors.devicePrefix}
+              </p>
+            )}
             <p className='text-sm text-gray-500'>
-              Prefix for device endpoints (e.g., "Sensor" → Sensor01,
-              Sensor02...)
+              Prefix for device endpoints (e.g., "Sensor" → Sensor01, Sensor02…)
             </p>
           </div>
 
           {/* Start Number */}
           <div className='grid gap-2'>
             <Label htmlFor='startNumber'>Start Number</Label>
-            <div className='flex items-center space-x-2'></div>
             <Input
               id='startNumber'
               type='number'
+              inputMode='numeric'
+              min={1}
               value={configForm.startNumber}
               onChange={(e) =>
                 setConfigForm((prev) => ({
                   ...prev,
-                  startNumber: parseInt(e.target.value) || 1,
+                  startNumber: clamp(
+                    parseInt(e.target.value, 10),
+                    1,
+                    Number.MAX_SAFE_INTEGER
+                  ),
                 }))
               }
-              min='1'
+              aria-invalid={!!errors.startNumber}
+              aria-describedby='startNumber-error'
             />
+            {errors.startNumber && (
+              <p id='startNumber-error' className='text-sm text-red-600'>
+                {errors.startNumber}
+              </p>
+            )}
           </div>
 
           {/* Count */}
@@ -149,16 +188,24 @@ export default function ConfigAddModal({
             <Input
               id='count'
               type='number'
+              inputMode='numeric'
+              min={1}
+              max={100}
               value={configForm.count}
               onChange={(e) =>
                 setConfigForm((prev) => ({
                   ...prev,
-                  count: parseInt(e.target.value) || 1,
+                  count: clamp(parseInt(e.target.value, 10), 1, 100),
                 }))
               }
-              min='1'
-              max='100'
+              aria-invalid={!!errors.count}
+              aria-describedby='count-error'
             />
+            {errors.count && (
+              <p id='count-error' className='text-sm text-red-600'>
+                {errors.count}
+              </p>
+            )}
             <p className='text-sm text-gray-500'>
               How many device configurations to generate (1-100)
             </p>
@@ -170,18 +217,26 @@ export default function ConfigAddModal({
             <Input
               id='paddingLength'
               type='number'
+              inputMode='numeric'
+              min={1}
+              max={6}
               value={configForm.paddingLength}
               onChange={(e) =>
                 setConfigForm((prev) => ({
                   ...prev,
-                  paddingLength: parseInt(e.target.value) || 2,
+                  paddingLength: clamp(parseInt(e.target.value, 10), 1, 6),
                 }))
               }
-              min='1'
-              max='5'
+              aria-invalid={!!errors.paddingLength}
+              aria-describedby='paddingLength-error'
             />
+            {errors.paddingLength && (
+              <p id='paddingLength-error' className='text-sm text-red-600'>
+                {errors.paddingLength}
+              </p>
+            )}
             <p className='text-sm text-gray-500'>
-              Padding for numbers (2 = 01, 02... | 3 = 001, 002...)
+              Padding for numbers (2 = 01, 02… | 3 = 001, 002…)
             </p>
           </div>
 
@@ -190,18 +245,21 @@ export default function ConfigAddModal({
             <Label className='text-sm font-medium'>Preview:</Label>
             <p className='text-sm text-gray-600 mt-1'>
               {configForm.devicePrefix}
-              {configForm.startNumber
-                .toString()
-                .padStart(configForm.paddingLength, '0')}
+              {String(configForm.startNumber).padStart(
+                configForm.paddingLength,
+                '0'
+              )}
               , {configForm.devicePrefix}
-              {(configForm.startNumber + 1)
-                .toString()
-                .padStart(configForm.paddingLength, '0')}
+              {String(configForm.startNumber + 1).padStart(
+                configForm.paddingLength,
+                '0'
+              )}
               , {configForm.devicePrefix}
-              {(configForm.startNumber + 2)
-                .toString()
-                .padStart(configForm.paddingLength, '0')}
-              ... ({configForm.count} total)
+              {String(configForm.startNumber + 2).padStart(
+                configForm.paddingLength,
+                '0'
+              )}
+              … ({configForm.count} total)
             </p>
           </div>
         </div>
@@ -212,14 +270,10 @@ export default function ConfigAddModal({
           </Button>
           <Button
             onClick={handleGenerateConfigs}
-            disabled={
-              generating ||
-              !configForm.devicePrefix.trim() ||
-              configForm.count < 1
-            }
+            disabled={generating || !isValid}
           >
             {generating
-              ? 'Generating...'
+              ? 'Generating…'
               : `Generate ${configForm.count} Configs`}
           </Button>
         </DialogFooter>
