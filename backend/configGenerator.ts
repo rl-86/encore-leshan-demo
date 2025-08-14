@@ -323,21 +323,11 @@ class LeshanBulkConfigurer {
 async function main() {
   const configurer = new LeshanBulkConfigurer();
 
-  /*  
- const endpoints = [
-    'Device001',
-    'Device002',
-    'Device003',
-    'Device004',
-    'Device005',
-  ]; 
-  */
-
   // Konfiguration
   const config = {
-    devicePrefix: 'TEST',
+    devicePrefix: 'Device',
     startNumber: 1,
-    count: 3,
+    count: 5,
     paddingLength: 2, // Antal siffror (001, 002, etc.)
   };
 
