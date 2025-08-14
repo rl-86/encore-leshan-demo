@@ -102,3 +102,14 @@ export async function deleteClientSecurityConf(params, opts) {
     return apiCall("api", "deleteClientSecurityConf", params, opts);
 }
 
+export async function postGenerateConfigs(params, opts) {
+    const handler = (await import("../../../../api\\api-demo")).postGenerateConfigs;
+    registerTestHandler({
+        apiRoute: { service: "api", name: "postGenerateConfigs", raw: false, handler, streamingRequest: false, streamingResponse: false },
+        middlewares: api_service.default.cfg.middlewares || [],
+        endpointOptions: {"expose":true,"auth":true,"isRaw":false,"isStream":false,"tags":[]},
+    });
+
+    return apiCall("api", "postGenerateConfigs", params, opts);
+}
+

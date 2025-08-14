@@ -70,3 +70,10 @@ export async function deleteClientSecurityConf(params, opts) {
 
     return apiCall("api", "deleteClientSecurityConf", params, opts);
 }
+export async function postGenerateConfigs(params, opts) {
+    if (typeof ENCORE_DROP_TESTS === "undefined" && process.env.NODE_ENV === "test") {
+        return TEST_ENDPOINTS.postGenerateConfigs(params, opts);
+    }
+
+    return apiCall("api", "postGenerateConfigs", params, opts);
+}

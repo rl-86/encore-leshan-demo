@@ -41,4 +41,8 @@ import { deleteClientSecurityConf as deleteClientSecurityConf_handler } from "..
 declare const deleteClientSecurityConf: WithCallOpts<typeof deleteClientSecurityConf_handler>;
 export { deleteClientSecurityConf };
 
+import { postGenerateConfigs as postGenerateConfigs_handler } from "../../../../api\\api-demo.js";
+declare const postGenerateConfigs: WithCallOpts<typeof postGenerateConfigs_handler>;
+export { postGenerateConfigs };
+
 
