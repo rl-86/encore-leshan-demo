@@ -1,7 +1,13 @@
-import { api } from 'encore.dev/api';
+import { api, APIError } from 'encore.dev/api';
+import log from 'encore.dev/log';
 import { secret } from 'encore.dev/config';
 import { DMConfigInterface } from './types/dm-config-interface';
 import { BSConfigInterface } from './types/bs-config-interface';
+import {
+  runBulkGenerate,
+  GenerateConfigRequest,
+  ConfigureSummary,
+} from '../services/configService';
 
 const allClients = secret('clients');
 const objectSpecs = secret('objectSpecs');
@@ -12,6 +18,7 @@ const bootstrapDelete = secret('bootstrapDelete');
 const postBsConf = secret('postBsConf');
 const postDmConf = secret('postDmConf');
 const clientSecurityConf = secret('clientSecurityConf');
+const uiOrUpstreamToken = secret('token');
 
 // Get all the clients configurations
 export const getAllClients = api(
@@ -215,5 +222,23 @@ export const deleteClientSecurityConf = api(
         `External delete failed: ${response.status} ${errorBody}`
       );
     }
+  }
+);
+
+// Generate configurations
+export const postGenerateConfigs = api(
+  { method: 'POST', path: '/configs/generate', expose: true, auth: true },
+  async (p: GenerateConfigRequest): Promise<ConfigureSummary> => {
+    if (p.count <= 0) throw APIError.invalidArgument('count must be > 0');
+    if (p.paddingLength < 1 || p.paddingLength > 6) {
+      throw APIError.invalidArgument('paddingLength must be between 1 and 6');
+    }
+
+    log.info('bulk generate request', p);
+    const summary = await runBulkGenerate(p, {
+      token: uiOrUpstreamToken(), // skicka in secreten
+      baseUrl: process.env.LESHAN_BASE_URL || undefined, // valfritt override
+    });
+    return summary;
   }
 );
