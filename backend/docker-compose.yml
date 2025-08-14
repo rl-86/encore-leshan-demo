@@ -19,7 +19,7 @@ services:
       - '5684:5684/udp'
 
   encore:
-    image: encore-leshan-demo:2.0.0
+    image: encore-leshan-demo:2.1.0
     ports:
       - '8080:8080'
     depends_on:
