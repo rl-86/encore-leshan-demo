@@ -12,7 +12,6 @@ import { postBootstrapConfig as postBootstrapConfigImpl5 } from "../../../../../
 import { postClientSecurityConf as postClientSecurityConfImpl6 } from "../../../../../api\\api-demo";
 import { deleteBsConf as deleteBsConfImpl7 } from "../../../../../api\\api-demo";
 import { deleteClientSecurityConf as deleteClientSecurityConfImpl8 } from "../../../../../api\\api-demo";
-import { postGenerateConfigs as postGenerateConfigsImpl9 } from "../../../../../api\\api-demo";
 import * as api_service from "../../../../../api\\encore.service";
 
 const handlers: Handler[] = [
@@ -117,18 +116,6 @@ const handlers: Handler[] = [
             service:           "api",
             name:              "deleteClientSecurityConf",
             handler:           deleteClientSecurityConfImpl8,
-            raw:               false,
-            streamingRequest:  false,
-            streamingResponse: false,
-        },
-        endpointOptions: {"expose":true,"auth":true,"isRaw":false,"isStream":false,"tags":[]},
-        middlewares: api_service.default.cfg.middlewares || [],
-    },
-    {
-        apiRoute: {
-            service:           "api",
-            name:              "postGenerateConfigs",
-            handler:           postGenerateConfigsImpl9,
             raw:               false,
             streamingRequest:  false,
             streamingResponse: false,

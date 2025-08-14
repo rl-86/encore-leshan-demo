@@ -10,9 +10,8 @@ import { postBootstrapConfig as api_postBootstrapConfigImpl5 } from "../../../..
 import { postClientSecurityConf as api_postClientSecurityConfImpl6 } from "../../../../api\\api-demo";
 import { deleteBsConf as api_deleteBsConfImpl7 } from "../../../../api\\api-demo";
 import { deleteClientSecurityConf as api_deleteClientSecurityConfImpl8 } from "../../../../api\\api-demo";
-import { postGenerateConfigs as api_postGenerateConfigsImpl9 } from "../../../../api\\api-demo";
-import * as api_service from "../../../../api\\encore.service";
 import * as auth_service from "../../../../auth\\encore.service";
+import * as api_service from "../../../../api\\encore.service";
 
 const gateways: any[] = [
     api_gatewayGW,
@@ -120,18 +119,6 @@ const handlers: Handler[] = [
             service:           "api",
             name:              "deleteClientSecurityConf",
             handler:           api_deleteClientSecurityConfImpl8,
-            raw:               false,
-            streamingRequest:  false,
-            streamingResponse: false,
-        },
-        endpointOptions: {"expose":true,"auth":true,"isRaw":false,"isStream":false,"tags":[]},
-        middlewares: api_service.default.cfg.middlewares || [],
-    },
-    {
-        apiRoute: {
-            service:           "api",
-            name:              "postGenerateConfigs",
-            handler:           api_postGenerateConfigsImpl9,
             raw:               false,
             streamingRequest:  false,
             streamingResponse: false,
